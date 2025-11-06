@@ -1,0 +1,117 @@
+/* src/components/NormalCard.css */
+
+/* --- 1. CARD CONTAINER --- */
+.normal-card {
+  background-color: #fff;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(255, 160, 190, 0.4);
+  position: relative;
+  height: 100%;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.normal-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(255, 160, 190, 0.6);
+}
+
+/* --- 2. PROJECT IMAGE (แถบด้านบน/รูป) --- */
+.project-image {
+  background-color: #ff7f50;
+  height: 180px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative; /* ให้เป็น parent ของปุ่ม edit */
+  overflow: hidden;
+}
+
+.banner-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* --- (optional) ป้ายสถานะ ถ้าใช้ใน JSX --- */
+.status-tag {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  background: #ffe7a0;
+  color: #8a5b00;
+}
+
+/* --- 3. PROJECT DETAILS --- */
+.normal-info {
+  padding: 15px;
+}
+
+.normal-info h3 {
+  color: #ff5c8d;
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin: 0 0 5px 0;
+}
+
+.normal-info p {
+  color: #444;
+  font-size: 0.95rem;
+  margin: 0 0 10px 0;
+}
+
+/* --- 4. TAGS --- */
+.tags {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag {
+  display: inline-block;
+  background-color: #ffe0eb;
+  color: #ff5c8d;
+  border-radius: 5px;
+  padding: 3px 8px;
+  font-size: 0.75rem;
+}
+
+/* --- 5. EDIT MODE BUTTONS --- */
+.edit-buttons {
+  position: absolute;
+  top: 10px;
+  left: 10px;       /* ถ้าอยากให้มุมขวาเปลี่ยนเป็น right: 10px */
+  display: flex;
+  gap: 5px;
+  z-index: 20;
+}
+
+.edit-buttons button,
+.edit-buttons a {
+  width: 30px;
+  height: 30px;
+  display: flex; justify-content: center; align-items: center;
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;
+  line-height: 1;
+  font-size: 1rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+.edit-btn { color: #000; }
+.delete-btn { color: #dc3545; }
+
+.edit-buttons button:hover,
+.edit-buttons a:hover {
+  transform: scale(1.15);
+  background-color: #fff;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+}

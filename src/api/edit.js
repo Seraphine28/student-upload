@@ -1,0 +1,13 @@
+// src/api/edit.js
+const BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
+;
+
+export async function editPortfolio(id, formData) {
+  const res = await fetch(`${BASE}/api/portfolio/${id}`, {
+    method: "PUT",
+    body: formData,
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Edit failed");
+  return data;
+}

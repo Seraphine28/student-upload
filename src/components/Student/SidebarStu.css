@@ -1,0 +1,105 @@
+/* Sidebar - สีเหลือง */
+.sidebar {
+  width: 260px;  /* ขนาด Sidebar */
+  background-color: #f7b500; /* สีเหลือง */
+  padding: 20px;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  top: 0;
+  height: 100%;
+  z-index: 10;
+  font-family: 'Poppins';  /* เปลี่ยนฟอนต์ใน Sidebar */
+   color: #fff;
+}
+
+.profile {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.profile .circle {
+  background: #fff;
+  color: #f9b800;
+  font-size: 36px;
+  font-weight: 600;
+  border-radius: 50%;
+  width: 70px;
+  height: 70px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 12px auto;
+}
+
+.profile h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.role {
+  background: #fff;
+  color: #f9b800;
+  border-radius: 20px;
+  padding: 3px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+
+/* เมนูใน Sidebar */
+.sidebar-links ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.sidebar-links li {
+  margin: 10px 0;
+}
+
+.sidebar-links a {
+  text-decoration: none;
+  color: #ffffff;
+  font-size: 1rem;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.3s;
+}
+
+.sidebar-links a:hover {
+  background-color: #ff6b2b;  /* สีส้มเมื่อ hover */
+  color: #fff;
+}
+
+.sidebar-links a svg {
+  margin-right: 10px;  /* ระยะห่างระหว่างไอคอนและข้อความ */
+  width: 20px;
+  height: 20px;
+}
+.top-bar {
+  margin-left: 270px;
+  display: flex;
+  flex-direction: column; /* 🔥 Stack แนวตั้งแทนแนวนอน */
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.search {
+  width: 70%;
+  padding: 10px 16px;
+  border-radius: 20px;
+  border: 2px solid #f9b800;
+  outline: none;
+  font-size: 15px;
+  background: #fff;
+}
+
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 4px; /* ขยับเข้าเล็กน้อย */
+}

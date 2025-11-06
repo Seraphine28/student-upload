@@ -1,0 +1,64 @@
+import React from "react";
+import "./NormalCard.css";
+import { Link } from 'react-router-dom';
+
+const ProjectCard = ({ id, title, name, university, year, description, image, category, tags = [], status = "", editMode }) => { 
+    
+    // โค้ดจัดการ Status (คงเดิม)
+    const statusClass = status.toLowerCase().replace(' ', '-');
+    const statusText = status.toUpperCase().replace('-', ' '); 
+    
+    // 🚨 1. สร้าง Path แบบมีเงื่อนไขตามสถานะ
+    const linkPath = status === "Draft" 
+                     ? `/edit/${id}`     // สถานะ DRAFT: ไปหน้า EditPage (Portfolio)
+                     : status === "Failed" 
+                     ? `/resubmit/${id}` // สถานะ FAILED: ไปหน้า StudentResubmit (Resubmit)
+                     : null;             // สถานะอื่นไม่มีลิงก์
+    
+    
+    return (
+        <div className="normal-card">
+            
+            <div className="project-image"> 
+                {status && status.trim() !== "" && (
+                    <span className={`status-tag ${statusClass}`}>{statusText}</span>
+                )}
+
+                {/* 🛠 ปุ่ม Edit & Delete แสดงเมื่อ editMode เป็นจริง */}
+                {editMode && (
+                    <div className="edit-buttons">
+                        
+                        {/* 🚨 2. แสดง Link เมื่อ linkPath ถูกกำหนดแล้วเท่านั้น */}
+                        {linkPath ? (
+                            <Link to={linkPath} className="edit-btn">
+                                🖊
+                            </Link>
+                        ) : (
+                            // ถ้าไม่มี Path แต่ปุ่มควรแสดง ให้แสดงเป็นปุ่มธรรมดาแทน
+                            <button className="edit-btn">
+                                🖊
+                            </button>
+                        )}
+                        
+                        <button className="delete-btn">❌</button>
+                    </div>
+                )}
+            </div>
+            
+            <div className="card">
+                
+                <img src={image || 'https://via.placeholder.com/150'} alt={title} className="card-img" />
+      <div className="card-content">
+        
+        <h3>{title}</h3>
+        <p>Name: {name}</p>
+        <p>University: {university}</p>
+        <p>Year: {year}</p>
+        <p>Category: {category}</p>
+        <p>Description: {description}</p>
+      </div>
+    </div>
+        </div>
+    );
+};
+export default ProjectCard;
