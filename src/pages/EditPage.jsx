@@ -67,7 +67,7 @@ useEffect(() => {
     try {
       await editPortfolio(form.id, fd);
       localStorage.removeItem("draftPortfolio"); // ลบ draft หลัง upload
-      navigate("/home"); // กลับหน้า Dashboard
+      navigate("/student/home"); // กลับหน้า Dashboard
     } catch (err) {
       setError(err.message || "Update failed");
     } finally {
@@ -174,7 +174,7 @@ useEffect(() => {
       
       {/* กากบาทมุมบนขวา */}
       <button
-        onClick={() => navigate("/status")}
+        onClick={() => navigate("/student/status")}
         style={{
           position: "absolute",
           top: 20,
@@ -281,7 +281,7 @@ useEffect(() => {
               type="button"
               onClick={() => {
                 localStorage.setItem("draftPortfolio", JSON.stringify(form));
-                navigate("/status");
+                navigate("/student/status");
               }}
               style={{
                 flex: 1,

@@ -91,7 +91,7 @@ export default function StudentResubmit() {
 
     try {
       await resubmitPortfolio(id, fd);
-      navigate("/home"); // หลัง resubmit กลับ dashboard
+      navigate("/student/home"); // หลัง resubmit กลับ dashboard
     } catch (err) {
       setError(err.message || "Resubmit failed");
     } finally {
@@ -198,7 +198,7 @@ export default function StudentResubmit() {
       
       {/* กากบาทมุมบนขวา */}
       <button
-        onClick={() => navigate("/fail-status-error")}
+        onClick={() => navigate("/student/fail-status-error")}
         style={{
           position: "absolute",
           top: 20,

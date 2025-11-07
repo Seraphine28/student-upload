@@ -1,112 +1,144 @@
-/* src/components/ProjectCard.css - โค้ดฉบับสมบูรณ์ */
-
-/* --- 1. CARD CONTAINER (โครงสร้างการ์ดหลัก) --- */
-.project-card {
-  background-color: white;
-  border-radius: 15px;
+/* กล่องการ์ดหลัก */
+.normal-card {
+  border: 2px solid #808080;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 6px 14px rgba(0,0,0,.08);
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(255, 160, 190, 0.4);
-  position: relative; 
-  height: 100%;
-  transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.project-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 16px rgba(255, 160, 190, 0.6);
-}
-
-/* --- 2. PROJECT IMAGE (ส่วนสีส้ม) --- */
-.project-image {
-  background-color: #ffffff;
-  height: 1px;
+/* แถวบนของกล่องขาว */
+.card-top {
   display: flex;
-  justify-content: center;
   align-items: center;
-  position: relative; /* สำคัญ: เป็น parent ให้ปุ่ม edit */
+  justify-content: space-between;
+  padding: 14px 14px 0 14px;
 }
 
-/* --- 3. PROJECT DETAILS (ข้อมูลข้อความ) --- */
-.project-info {
+.card-title {
+  margin: 0;
+  font-size: 18px;
+  color: #111;
+}
+
+/* รูป */
+.card-img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  display: block;
+  border-radius: 12px;
+  margin: 10px 14px 0 14px;
+}
+
+/* เนื้อหา */
+.card-content {
+  padding: 12px 14px 16px 14px;
+}
+
+.desc { margin-top: 6px; }
+
+/* ----- Status badge ในกล่องขาว ----- */
+.status-badge {
+  display: inline-block;
+  position: static;       /* สำคัญ: ไม่ให้ลอยออกนอกกรอบ */
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 1;
+}
+
+/* โทนสีตามสถานะ (ใช้ class ที่แปลงแล้ว) */
+.status-badge.pending {
+  background: #fff7ce;
+  color: #b99d00;
+  border: 1px solid #f9b800;
+}
+.status-badge.approved {
+  background: #e0ffe9;
+  color: #0b864b;
+  border: 1px solid #00c853;
+}
+.status-badge.failed, .status-badge.rejected {
+  background: #ffe6e6;
+  color: #d32f2f;
+  border: 1px solid #f44336;
+}
+.status-badge.draft {
+  background: #d0d0d0;
+  color: #484848;
+  border: 1px solid #454545;
+}
+.status-badge.inprocess{
+  background: #b4e1ff;
+  color: #457391;
+  border: 1px solid #487797;
+}
+
+/* ปุ่มแก้ไข/ลบ */
+.edit-buttons {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+.edit-buttons a,
+.edit-buttons button {
+  width: 30px; height: 30px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  border: 1px solid rgba(0,0,0,.1);
+  background: rgba(255,255,255,.95);
+  box-shadow: 0 2px 4px rgba(0,0,0,.15);
+  cursor: pointer;
+}
+
+/* สวิตช์ Visibility (ง่าย ๆ) */
+.switch-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  user-select: none;
+  justify-content: flex-start; /* ✅ จัดแนวให้อยู่ต้นบรรทัดแต่ไม่ชิดซ้ายสุด */
+  padding-left: 10px;   
+}
+.switch-label input { 
+  display: none; 
+}
+/* ✅ ตั้ง container ของการ์ดให้เป็น relative เพื่อให้จัดตำแหน่งลูกได้ */
+.card-content {
+  position: relative;
   padding: 15px;
 }
 
-.project-info h3 {
-  color: #ff5c8d;
-  font-size: 1.1rem;
-  font-weight: bold;
-  margin: 0 0 5px 0;
-}
-
-.project-info p {
-  color: #444;
-  font-size: 0.95rem;
-  margin: 0 0 10px 0;
-}
-
-/* --- 4. TAGS --- */
-.tags-row {
-  margin-top: 10px;
-  display: flex;
-  flex-wrap: wrap;
-}
-.tag {
-  display: inline-block;
-  background-color: #ffe0eb;
-  color: #ff5c8d;
-  border-radius: 5px;
-  padding: 3px 8px;
-  font-size: 0.75rem;
-  margin-right: 8px;
-  margin-bottom: 5px;
-}
-
-/* --- 5. ปุ่มแก้ไข / ลบ (Edit Mode) --- */
-.edit-buttons {
-  /* 💡 ตำแหน่งชิดซ้ายบน */
+/* ✅ วาง toggle switch ไว้มุมล่างซ้าย */
+.visibility-control {
   position: absolute;
-  top: 10px;
-  left: 10px;
+  bottom: 10px;
+  left: 15px;
   display: flex;
-  gap: 5px; /* ระยะห่างระหว่างไอคอน */
-  z-index: 20;
-}
-
-.edit-buttons button,
-.edit-buttons a {
-  /* 💡 ลดขนาดไอคอนและปรับเป็นวงกลม */
-  width: 30px; 
-  height: 30px;
-  display: flex;
-  justify-content: center;
   align-items: center;
-  
-  /* สไตล์พื้นหลังและเส้นขอบ */
-  background-color: rgba(255, 255, 255, 0.9); /* พื้นหลังขาวขุ่น */
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  gap: 6px;
+}
+
+.slider {
+  position: relative;
+  width: 44px; height: 24px;
+  background: #ccc;
+  border-radius: 999px;
+  transition: .2s;
+}
+.slider::after {
+  content: "";
+  position: absolute;
+  width: 18px; height: 18px;
+  top: 3px; left: 3px;
+  background: #fff;
   border-radius: 50%;
-  
-  cursor: pointer;
-  transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;
-  line-height: 1; 
-  font-size: 1rem; /* ขนาดสัญลักษณ์ */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  transition: .2s;
 }
+input:checked + .slider { background: #22c55e; }
+input:checked + .slider::after { transform: translateX(20px); }
 
-/* 🖊 ปุ่มแก้ไข */
-.edit-btn {
-  color: Black; /* สีดำ */
-}
-
-/* ❌ ปุ่มลบ */
-.delete-btn {
-  color: #dc3545; /* สีแดง */
-}
-
-/* เอฟเฟกต์ hover */
-.edit-buttons button:hover,
-.edit-buttons a:hover {
-  transform: scale(1.15);
-  background-color: white;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
-}
+.private-text, .public-text { font-size: 12px; color: #555; }

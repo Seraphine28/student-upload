@@ -60,7 +60,7 @@ export default function UploadPortfolio() {
       const result = await uploadPortfolio(fd);
       console.log("uploaded:", result);
       localStorage.removeItem("draftPortfolio");
-      navigate("/dashboard");
+      navigate("/student/upload");
     } catch (err) {
       setError(err.message || "Upload error");
     } finally {
@@ -167,7 +167,7 @@ export default function UploadPortfolio() {
       
       {/* กากบาทมุมบนขวา */}
       <button
-        onClick={() => navigate("/home")}
+        onClick={() => navigate("/student/home")}
         style={{
           position: "absolute",
           top: 20,
@@ -275,7 +275,7 @@ export default function UploadPortfolio() {
               type="button"
               onClick={() => {
                 localStorage.setItem("draftPortfolio", JSON.stringify(form));
-                navigate("/status");
+                navigate("/student/status");
               }}
               style={{
                 flex: 1,

@@ -90,7 +90,7 @@ useEffect(() => {
       }}>
         {/* ไอคอนดินสอ */}
         <button
-          onClick={() => navigate(`/resubmit/${id}`)}
+          onClick={() => navigate(`/student/resubmit/${id}`)}
           style={{
             position: "absolute",
             top: -35,
@@ -211,7 +211,7 @@ useEffect(() => {
 
         {/* OK Button */}
         <button
-          onClick={() => navigate(`/status`)}
+          onClick={() => navigate(`/student/status`)}
           style={{
             display: "block",
             marginLeft: "auto",

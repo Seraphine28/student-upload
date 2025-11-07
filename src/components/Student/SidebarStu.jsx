@@ -12,9 +12,8 @@ export default function SidebarStu() {
       </div>
 
       <ul className="menu">
-        <li><Link to="/status">Profile</Link></li>
-        <li><Link to="/portfolio-form">Upload portfolio</Link></li> {/* ✅ ลิงก์ไป UploadPortfolio.jsx */}
-        <li><Link to="/home">Home</Link></li>
+        <li><Link to="/student/status">Profile</Link></li>
+        <li><Link to="/student/portfolio-form">Upload portfolio</Link></li> {/* ✅ ลิงก์ไป UploadPortfolio.jsx */}
         <li><Link to="/logout">LogOut</Link></li>
       </ul>
     </aside>
