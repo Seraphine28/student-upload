@@ -15,7 +15,7 @@ export default function SidebarSuper() {
       <ul className="menu">
         <li><Link to="/super/verify">Verify Portfolio from Advisor</Link></li>
         <li><Link to="/super/verify-acc">Verify Account New User</Link></li>
-        <li><Link to="/">LogOut</Link></li>
+        <li><Link to="/">Log Out</Link></li>
       </ul>
     </aside>
   );

@@ -1,8 +1,9 @@
+// src/components/NormalCard.jsx
 import React from "react";
-import "./NormalCard.css";
 import { Link } from "react-router-dom";
+import "./NormalCard.css";
 
-export default function ProjectCard({
+export default function NormalCard({
   id,
   title,
   name,
@@ -13,23 +14,26 @@ export default function ProjectCard({
   category,
   status = "",
   editMode = false,
-  isPublic = false,                  // ✅ สถานะเผยแพร่ปัจจุบัน
-  onVisibilityChange,               // ✅ ฟังก์ชันเวลาสลับสวิตช์
+  isPublic = false,
+  onVisibilityChange,
 }) {
   const statusClass = status.toLowerCase().replace(/\s+/g, "");
+  const isApproved = status === "Approved";
+
   const linkPath =
-    status === "Draft" ? `/student/edit/${id}` :
+    status === "Draft"  ? `/student/edit/${id}` :
     status === "Failed" ? `/student/resubmit/${id}` :
     null;
 
-  return (
+  const commentPath = `/project/${id}/comments`;
+
+  // เนื้อหาการ์ดหลัก
+  const body = (
     <div className="card normal-card">
-      {/* แถวบนของกล่องขาว: ชื่อโปรเจกต์ + badge */}
+      {/* แถวบน: ชื่อ + badge */}
       <div className="card-top">
         <h3 className="card-title">{title}</h3>
-        {status && (
-          <span className={`status-badge ${statusClass}`}>{status}</span>
-        )}
+        {status && <span className={`status-badge ${statusClass}`}>{status}</span>}
       </div>
 
       {/* รูปภาพ */}
@@ -47,21 +51,23 @@ export default function ProjectCard({
         <p><strong>Category:</strong> {category || "-"}</p>
         <p className="desc"><strong>Description:</strong> {description || "-"}</p>
 
-        {/* ✅ แสดงสวิตช์เฉพาะสถานะ Approved */}
-        {status === "Approved" && typeof onVisibilityChange === "function" && (
-          <label className="switch-label">
-            <span className="private-text">Private</span>
-            <input
-              type="checkbox"
-              checked={isPublic}
-              onChange={(e) => onVisibilityChange(id, e.target.checked)}
-            />
-            <span className="slider round" />
-            <span className="public-text">Public</span>
-          </label>
+        {/* แสดงสวิตช์เฉพาะ Approved */}
+        {isApproved && typeof onVisibilityChange === "function" && (
+          <div className="visibility-control">
+            <label className="switch-label">
+              <span className="private-text">Private</span>
+              <input
+                type="checkbox"
+                checked={isPublic}
+                onChange={(e) => onVisibilityChange(id, e.target.checked)}
+              />
+              <span className="slider round" />
+              <span className="public-text">Public</span>
+            </label>
+          </div>
         )}
 
-        {/* ปุ่มแก้ไข/ลบ (เฉพาะตอน editMode) */}
+        {/* ปุ่มแก้/ลบ เฉพาะตอน editMode */}
         {editMode && (
           <div className="edit-buttons">
             {linkPath ? (
@@ -75,4 +81,14 @@ export default function ProjectCard({
       </div>
     </div>
   );
+
+  // ถ้า Approved ให้ทั้งการ์ดคลิกได้
+  return isApproved ? (
+    <Link to={commentPath} className="card-link-wrapper">
+      {body}
+    </Link>
+  ) : (
+    body
+  );
 }
+

@@ -3,12 +3,15 @@ import { Routes, Route, Navigate } from "react-router-dom";
 
 // 🟡 Student Pages
 import HomeStudent from "./components/Student/HomeStudent";
+import HomeRecruiter from "./components/Recruiter/HomeRecruiter";
+
 import UploadPortfolio from "./pages/UploadPortfolio";
 import WorkStatusPage from "./pages/WorkStatusPage";
 import EditPage from "./pages/EditPage";
 import StudentResubmit from "./pages/StudentResubmit";
 import PortfolioFail from "./pages/PortfolioFail";
-import ProfilePage from "./pages/ProfilePage";
+import CommentPage from './pages/CommentPage';
+
 
 // 💗 Advisor Pages
 import VerifyPortfolioAdvisor from "./components/AdminAdvisor/VerifyPortfolio"; // ชื่อให้ชัดว่าเป็น Advisor
@@ -18,7 +21,7 @@ import AdvisorReview from "./pages/AdvisorReview";
 import VerifyPortfolioSuper from "./components/SuperAdmin/VerifyPortfolioDone"; // หน้า list ของ super (ตามที่คุณตั้งชื่อ)
 import VerifyAcc from "./components/SuperAdmin/VerifyAcc"; // ✅ หน้า verify account ของ super
 import SuperReview from "./pages/SuperReview.jsx";
-
+import UserApprovalDetail from "./pages/UserApprovalDetail.jsx";
 import "./App.css";
 
 export default function App() {
@@ -34,7 +37,9 @@ export default function App() {
       <Route path="/student/edit/:id" element={<EditPage />} />
       <Route path="/student/resubmit/:id" element={<StudentResubmit />} />  {/* ✅ ทำให้สม่ำเสมอ */}
       <Route path="/student/fail-status-error" element={<PortfolioFail />} />
-      <Route path="/student/profile" element={<ProfilePage showControls={false} />} />
+      <Route path="/project/:projectId/comments" element={<CommentPage />} />
+
+      <Route path="/recruiter/home" element={<HomeRecruiter/>} />
 
       {/* 💗 ADVISOR ROUTES */}
       <Route path="/advisor/verify" element={<VerifyPortfolioAdvisor />} />
@@ -44,7 +49,8 @@ export default function App() {
       <Route path="/super/verify" element={<VerifyPortfolioSuper />} />
       <Route path="/super/review/:id" element={<SuperReview />} />
       <Route path="/super/verify-acc" element={<VerifyAcc />} />         {/* ✅ ใช้หน้า VerifyAcc ของ super */}
-
+      <Route path="/super/user-approval/:id" element={<UserApprovalDetail />} />
+      
       {/* 🚧 Fallback */}
       <Route path="*" element={<div>404 - Page Not Found</div>} />
     </Routes>

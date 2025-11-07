@@ -1,20 +1,17 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import SidebarSuper from "../SuperAdmin/SidebarSuper";
 
 export default function VerifyAcc() {
+  const navigate = useNavigate();
+
   const [accounts, setAccounts] = useState([
-    { id: 1, name: "Rainbow Pinky", role: "Student", status: "Pending" },
+    { id: 1, name: "Rainbow Pinky", role: "Student", status: "In Process" },
     { id: 2, name: "Harry Potter", role: "Recruiter", status: "Pending" },
-    { id: 3, name: "Hermione G.", role: "Student", status: "Pending" },
-    { id: 4, name: "Ron Weasley", role: "Advisor", status: "Pending" },
   ]);
 
-  const updateStatus = (id, newStatus) => {
-    setAccounts((prev) =>
-      prev.map((acc) =>
-        acc.id === id ? { ...acc, status: newStatus } : acc
-      )
-    );
+  const handleStartReview = (id) => {
+    navigate(`/super/user-approval/${id}`);
   };
 
   return (
@@ -23,7 +20,7 @@ export default function VerifyAcc() {
       <div className="main-container">
         <h2 className="page-title">Verify Accounts</h2>
         <p className="page-subtitle">
-          Review pending user accounts and approve or reject them.
+          Review pending user accounts and start the review process.
         </p>
 
         <table className="verify-table">
@@ -45,11 +42,7 @@ export default function VerifyAcc() {
                 <td>
                   <span
                     className={`status-badge ${
-                      acc.status === "Approved"
-                        ? "approved"
-                        : acc.status === "Rejected"
-                        ? "rejected"
-                        : "pending"
+                      acc.status.toLowerCase().replace(" ", "")
                     }`}
                   >
                     {acc.status}
@@ -58,15 +51,10 @@ export default function VerifyAcc() {
                 <td>
                   <button
                     className="btn-approve"
-                    onClick={() => updateStatus(acc.id, "Approved")}
+                    disabled={acc.status !== "In Process"}
+                    onClick={() => handleStartReview(acc.id)}
                   >
-                    Approve
-                  </button>
-                  <button
-                    className="btn-reject"
-                    onClick={() => updateStatus(acc.id, "Rejected")}
-                  >
-                    Reject
+                    Start Review
                   </button>
                 </td>
               </tr>
