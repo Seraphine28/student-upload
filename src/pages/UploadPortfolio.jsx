@@ -3,6 +3,7 @@ import FileInput from "../components/FileInput";
 import { validateFiles } from "../utils/validators";
 import { uploadPortfolio } from "../api/upload";
 import { useNavigate } from "react-router-dom";
+import { uploadPortfolioDraft } from "../api/portfolioDraft"; //เพิ่ม
 
 
 export default function UploadPortfolio() {
@@ -35,10 +36,6 @@ export default function UploadPortfolio() {
     ]
   };
 
-  useEffect(() => {
-    const draft = localStorage.getItem("draftPortfolio");
-    if (draft) setForm(JSON.parse(draft));
-  }, []);
 
   const handleFileChange = (files) => setForm(f => ({ ...f, files }));
 
@@ -49,17 +46,18 @@ export default function UploadPortfolio() {
     setError(""); setLoading(true);
 
     const fd = new FormData();
-    fd.append("title", form.title);
-    fd.append("desc", form.description);
-    fd.append("university", form.university);
-    fd.append("year", JSON.stringify(form.year));
-    fd.append("category", JSON.stringify(form.category));
-    form.files.forEach(file => fd.append("file", file));
+                  fd.append("title", form.title);
+                  fd.append("description", form.description);
+                  fd.append("university", form.university);
+                  fd.append("yearOfProject", form.year);
+                  fd.append("category", form.category);
+                  form.files.forEach(file => fd.append("images", file));
+
 
     try {
       const result = await uploadPortfolio(fd);
       console.log("uploaded:", result);
-      localStorage.removeItem("draftPortfolio");
+
       navigate("/student/upload");
     } catch (err) {
       setError(err.message || "Upload error");
@@ -269,26 +267,45 @@ export default function UploadPortfolio() {
             />
           </div>
 
-          {/* Buttons */}
           <div style={{ display: "flex", gap: 450, marginTop: 10 }}>
             <button
               type="button"
-              onClick={() => {
-                localStorage.setItem("draftPortfolio", JSON.stringify(form));
-                navigate("/student/status");
-              }}
-              style={{
-                flex: 1,
-                padding: 10,
-                borderRadius: 8,
-                fontSize: 15,
-                border: "1px solid #c0bdbdff",
-                background: "#c2bcbcff",
-                color: "#000"
-              }}
-            >
-              Draft
-            </button>
+              disabled={loading}
+              onClick={async () => {
+                try {
+                  setLoading(true);
+                  setError("");
+
+                  const fd = new FormData();
+                  fd.append("title", form.title);
+                  fd.append("description", form.description);
+                  fd.append("university", form.university);
+                  fd.append("yearOfProject", form.year);
+                  fd.append("category", form.category);
+                  form.files.forEach(file => fd.append("images", file));
+
+                  const result = await uploadPortfolioDraft(fd);
+                  console.log("Draft saved:", result);
+                  navigate("/student/home"); // หรือจะไปหน้าอื่น เช่น "/PortfolioDetail" ก็ได้
+                } catch (err) {
+                  setError(err.message || "Failed to save draft");
+                } finally {
+                  setLoading(false);
+                }
+                }}
+                style={{
+                  flex: 1,
+                  padding: 10,
+                  borderRadius: 8,
+                  fontSize: 15,
+                  border: "1px solid #c0bdbdff",
+                  background: "#c2bcbcff",
+                  color: "#000"
+                }}
+              >
+                {loading ? "Saving..." : "Draft"}
+              </button> 
+
             <button
               type="submit"
               disabled={loading}

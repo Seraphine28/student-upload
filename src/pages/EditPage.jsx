@@ -4,6 +4,7 @@ import { validateFiles } from "../utils/validators";
 import { editPortfolio } from "../api/edit";
 import { useNavigate, useParams } from "react-router-dom";
 import { getPortfolio } from "../api/portfolio";
+import { uploadPortfolioDraft } from "../api/portfolioDraft"; //เพิ่ม
 
 
 
@@ -11,9 +12,9 @@ export default function EditPage() {
   const { id } = useParams();
   const [form, setForm] = useState({
     title: "",
-    university: "",
-    year: "",
-    category: "",
+    university: [],
+    year: [],
+    category: [],
     description: "",
     files: []
   });
@@ -37,17 +38,6 @@ export default function EditPage() {
     ]
   };
 
-useEffect(() => {
-  const draft = localStorage.getItem(`draftPortfolio`);
-  if (draft) {
-    setForm(JSON.parse(draft));
-  } else if (id) {
-    getPortfolio(id).then(data => setForm(data)); // ✅ ใช้ getPortfolio แทน
-  }
-}, [id]);
-
-
-
   const handleFileChange = (files) => setForm(f => ({ ...f, files }));
 
   const handleSubmit = async (e) => {
@@ -57,16 +47,16 @@ useEffect(() => {
     setError(""); setLoading(true);
 
     const fd = new FormData();
-    fd.append("title", form.title);
-    fd.append("university", form.university);
-    fd.append("year", JSON.stringify(form.year));
-    fd.append("category", JSON.stringify(form.category));
-    fd.append("description", form.description);
-    form.files.forEach(file => fd.append("files", file));
+                  fd.append("title", form.title);
+                  fd.append("description", form.description);
+                  fd.append("university", form.university);
+                  fd.append("yearOfProject", form.year);
+                  fd.append("category", form.category);
+                  form.files.forEach(file => fd.append("images", file));
+
 
     try {
       await editPortfolio(form.id, fd);
-      localStorage.removeItem("draftPortfolio"); // ลบ draft หลัง upload
       navigate("/student/home"); // กลับหน้า Dashboard
     } catch (err) {
       setError(err.message || "Update failed");
@@ -279,22 +269,42 @@ useEffect(() => {
           <div style={{ display: "flex", gap: 450, marginTop: 10 }}>
             <button
               type="button"
-              onClick={() => {
-                localStorage.setItem("draftPortfolio", JSON.stringify(form));
-                navigate("/student/status");
-              }}
-              style={{
-                flex: 1,
-                padding: 10,
-                borderRadius: 8,
-                fontSize: 15,
-                border: "1px solid #c0bdbdff",
-                background: "#c2bcbcff",
-                color: "#000"
-              }}
-            >
-              Draft
-            </button>
+              disabled={loading}
+              onClick={async () => {
+                try {
+                  setLoading(true);
+                  setError("");
+
+                  const fd = new FormData();
+                  fd.append("title", form.title);
+                  fd.append("description", form.description);
+                  fd.append("university", form.university);
+                  fd.append("yearOfProject", form.year);
+                  fd.append("category", form.category);
+                  form.files.forEach(file => fd.append("images", file));
+
+                  const result = await uploadPortfolioDraft(fd);
+                  console.log("Draft saved:", result);
+                  navigate("/dashboard"); // หรือจะไปหน้าอื่น เช่น "/PortfolioDetail" ก็ได้
+                } catch (err) {
+                  setError(err.message || "Failed to save draft");
+                } finally {
+                  setLoading(false);
+                }
+                }}
+                style={{
+                  flex: 1,
+                  padding: 10,
+                  borderRadius: 8,
+                  fontSize: 15,
+                  border: "1px solid #c0bdbdff",
+                  background: "#c2bcbcff",
+                  color: "#000"
+                }}
+              >
+                {loading ? "Saving..." : "Draft"}
+              </button> 
+            
             <button
               type="submit"
               disabled={loading}

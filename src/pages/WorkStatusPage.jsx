@@ -1,110 +1,98 @@
-import React, { useState } from "react";
+// src/pages/WorkStatusPage.jsx
+import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import ProfileHeader from "../components/ProfileHeader";
 import NormalCard from "../components/NormalCard";
 import "./StatusPage.css";
 
+const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
+const USE_BACKEND =
+  String(process.env.REACT_APP_USE_BACKEND || "false").toLowerCase() === "true";
+
 function WorkStatusPage({ showControls }) {
   const navigate = useNavigate();
+
   const [isEditing, setIsEditing] = useState(false);
+  const [projects, setProjects] = useState([]);      // ✅ ไม่มี mock แล้ว
+  const [loading, setLoading]   = useState(true);
+  const [error, setError]       = useState("");
 
-  // ✅ ทำเป็น state เพื่อจะได้ setProjects ได้
-  const [projects, setProjects] = useState([
-    {
-      id: "proj_a_001",
-      title: "Project A",
-      description: "AI system for KMUTT.",
-      tags: ["AI", "2023"],
-      status: "Pending",
-      name: "Rainbow Pinky",
-      university: "KMUTT",
-      year: "2023",
-      category: "AI",
-      image: "",
-      isPublic: false,
-    },
-    {
-      id: "proj_b_002",
-      title: "Project B",
-      description: "Web dashboard for health data.",
-      tags: ["React", "2024"],
-      status: "Approved",
-      name: "Rainbow Pinky",
-      university: "KMUTT",
-      year: "2024",
-      category: "Web",
-      image: "",
-      isPublic: true,
-    },
-    {
-      id: "proj_c_003",
-      title: "Project C",
-      description: "Hospital record system.",
-      tags: ["Database", "Node.js"],
-      status: "Failed",
-      name: "Rainbow Pinky",
-      university: "KMUTT",
-      year: "2022",
-      category: "DB",
-      image: "",
-      isPublic: false,
-    },
-    {
-      id: "proj_d_004",
-      title: "Project D",
-      description: "Monitoring system for IoT devices.",
-      tags: ["IoT", "Cloud"],
-      status: "Draft",
-      name: "Rainbow Pinky",
-      university: "KMUTT",
-      year: "2025",
-      category: "IoT",
-      image: "",
-      isPublic: false,
-    },
-    {
-      id: "proj_e_005",
-      title: "Project E",
-      description: "Project Management Tool.",
-      tags: ["Angular", "Web"],
-      status: "In Process",
-      name: "Rainbow Pinky",
-      university: "KMUTT",
-      year: "2024",
-      category: "Web",
-      image: "",
-      isPublic: false,
-    },
-    {
-      id: "proj_f_006",
-      title: "Project F",
-      description: "Financial tracking app.",
-      tags: ["Node", "Web"],
-      status: "Pending",
-      name: "Rainbow Pinky",
-      university: "KMUTT",
-      year: "2023",
-      category: "FinTech",
-      image: "",
-      isPublic: false,
-    },
-  ]);
-
+  // TODO: ดึงข้อมูล profile จริงจากระบบ auth ของคุณ
   const [profileData] = useState({
     name: "Rainbow Pinky",
     university: "KMUTT",
     contact: "rainbowpink@kmutt.ac.th",
   });
 
-  const handleInlineSaveAndClose = () => {
-    // TODO: save จริง
-    setIsEditing(false);
-  };
+  // ========= Load portfolios ของผู้ใช้ =========
+  useEffect(() => {
+    let alive = true;
+
+    async function fetchMine() {
+      setLoading(true);
+      setError("");
+      try {
+        if (!USE_BACKEND) {
+          // ยังไม่เชื่อม backend: โชว์ว่าง ๆ ไปก่อน
+          if (!alive) return;
+          setProjects([]);
+          setLoading(false);
+          return;
+        }
+
+        // ปรับ endpoint ให้ตรงกับ backend ของคุณ:
+        // แนะนำ: GET /api/portfolio/mine  (คืนงานทั้งหมดของเจ้าของ)
+        const res = await fetch(`${API_BASE}/api/portfolio/mine`, {
+          headers: {
+            // ถ้ามี token:
+            // Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) {
+          const text = await res.text().catch(() => "");
+          throw new Error(`Fetch failed (HTTP ${res.status}). ${text.slice(0,200)}`);
+        }
+
+        const data = await res.json();
+        // คาดหวังรูปแบบ: { items: [...] } หรือเป็น array ก็ได้
+        const items = Array.isArray(data) ? data : (data.items || []);
+        if (!alive) return;
+
+        // map ให้ชื่อตรงกับ props ของ NormalCard ถ้าฟิลด์ backend ต่างชื่อ
+        const normalized = items.map((it) => ({
+          id:        it._id || it.id,
+          title:     it.title,
+          description: it.desc || it.description,
+          name:      it.owner?.displayName || it.ownerName || "",
+          university:it.university || it.owner?.university || "",
+          year:      it.yearOfProject || it.year || "",
+          category:  it.category || "",
+          image:     (it.images && it.images[0]) || it.coverUrl || "",
+          status:    it.statusV2 || it.status || "",
+          isPublic:  it.visibility === "public",
+          tags:      it.tags || [],
+        }));
+
+        setProjects(normalized);
+      } catch (e) {
+        if (!alive) return;
+        setError(e.message || "Load portfolios error");
+      } finally {
+        if (alive) setLoading(false);
+      }
+    }
+
+    fetchMine();
+    return () => { alive = false; };
+  }, []);
 
   // ตอนกด Edit ให้เห็นเฉพาะ Draft/Failed
-  const filteredProjects = isEditing
-    ? projects.filter((p) => p.status === "Draft" || p.status === "Failed")
-    : projects;
+  const filteredProjects = useMemo(() => {
+    return isEditing
+      ? projects.filter((p) => p.status === "Draft" || p.status === "Failed")
+      : projects;
+  }, [isEditing, projects]);
 
   return (
     <>
@@ -137,10 +125,26 @@ function WorkStatusPage({ showControls }) {
             contact={profileData.contact}
             showEdit={isEditing}
             onClickEdit={() => setIsEditing(true)}
-            onClickSave={handleInlineSaveAndClose}
+            onClickSave={() => setIsEditing(false)}
             showControls={showControls}
           />
         </div>
+
+        {/* แจ้งสถานะโหลด / error / ว่าง */}
+        {loading && <div style={{ margin: "16px 0" }}>Loading…</div>}
+        {error && (
+          <div style={{ margin: "16px 0", color: "crimson" }}>
+            {error}
+          </div>
+        )}
+        {!loading && !error && filteredProjects.length === 0 && (
+          <div style={{ margin: "16px 0", color: "#666" }}>
+            ไม่มีผลงานให้แสดง
+            {USE_BACKEND
+              ? " (ยังไม่มีผลงานในระบบของคุณ)"
+              : " (โหมดยังไม่เชื่อม backend)"}
+          </div>
+        )}
 
         {/* กริดการ์ดสถานะงาน */}
         <main className="status-projects-grid">
@@ -157,18 +161,28 @@ function WorkStatusPage({ showControls }) {
               image={p.image}
               status={p.status}
               isPublic={p.isPublic}
-              onVisibilityChange={(id, checked) => {
+              onVisibilityChange={async (id, checked) => {
+                // อัปเดต UI ทันที
                 setProjects((prev) =>
-                  prev.map((x) =>
-                    x.id === id ? { ...x, isPublic: checked } : x
-                  )
+                  prev.map((x) => (x.id === id ? { ...x, isPublic: checked } : x))
                 );
-                // ถ้ามี backend:
-                // fetch(`${API_BASE}/api/portfolio/${id}/visibility`, {
-                //   method: 'PUT',
-                //   headers: { 'Content-Type': 'application/json' },
-                //   body: JSON.stringify({ isPublic: checked }),
-                // });
+
+                // ยิง backend ถ้ามี
+                if (USE_BACKEND) {
+                  try {
+                    await fetch(`${API_BASE}/api/portfolio/${id}/visibility`, {
+                      method: "PUT",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ visibility: checked ? "public" : "private" }),
+                    });
+                  } catch (e) {
+                    // roll back ถ้าล้มเหลว
+                    setProjects((prev) =>
+                      prev.map((x) => (x.id === id ? { ...x, isPublic: !checked } : x))
+                    );
+                    alert(e.message || "Update visibility failed");
+                  }
+                }
               }}
               // ปุ่มแก้/ส่งใหม่ เฉพาะ Draft/Failed และเมื่อกด Edit แล้ว
               editMode={(p.status === "Draft" || p.status === "Failed") && isEditing}

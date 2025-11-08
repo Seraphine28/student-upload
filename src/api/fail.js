@@ -1,6 +1,6 @@
-const BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
+const BASE = process.env.REACT_APP_API_BASE;
 export async function getFallPortfolio(id, token) {
-  const res = await fetch(`${BASE}/api/portfolio/${id}/fall`, {
+  const res = await fetch(`${BASE}/api/portfolio/${id}/fail`, {
     method: "GET",
     headers: {
       ...(token ? { "Authorization": `Bearer ${token}` } : {}),

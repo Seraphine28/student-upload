@@ -18,6 +18,9 @@ router.get('/projects/:projectId/details', (req, res) => {
     res.json({
         id: projectId,
         title: project.title,
+        name: project.namr,
+        university: project.university,
+        year: project.year,
         description: project.description,
         // 💡 สำคัญ: ต้องส่ง Array ของ URL รูปภาพ
         images: project.images

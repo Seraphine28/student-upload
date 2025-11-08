@@ -1,67 +1,55 @@
-// src/components/SuperAdmin/VerifyAcc.jsx
+// src/components/AdminAdvisor/VerifyPortfolioAdvisor.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import SidebarSuper from "../SuperAdmin/SidebarSuper";
+import SidebarAdvi from "../AdminAdvisor/SidebarAdvi";
 
-export default function VerifyAcc() {
+export default function VerifyPortfolioAdvisor() {
   const navigate = useNavigate();
 
-  // ตัวอย่างข้อมูล: สถานะที่ Super ได้รับมาจาก Advisor คือ "In Process"
-  const [accounts] = useState([
-    { id: 1, name: "Rainbow Pinky", role: "Student",  status: "In Process" },
-    { id: 2, name: "Harry Potter",  role: "Recruiter",status: "Pending" },
-    { id: 3, name: "Hermione G.",   role: "Student",  status: "In Process" },
-    { id: 4, name: "Ron Weasley",   role: "Advisor",  status: "Pending" },
+  const [portfolios, setPortfolios] = useState([
+    { id: 1, title: "AI-Based Image Classifier", student: "Rainbow Pinky", status: "Pending" },
+    { id: 2, title: "IoT Health Tracker", student: "Harry Potter", status: "Pending" },
   ]);
 
   const handleStartReview = (id) => {
-    // ไปหน้ารีวิวแบบละเอียด
-    navigate(`/super/user-approval/${id}`);
+    // เปลี่ยนสถานะในตาราง (แสดงว่าเริ่มรีวิวแล้ว)
+    setPortfolios(prev =>
+      prev.map(p => (p.id === id ? { ...p, status: "In Progress" } : p))
+    );
+
+    // นำทางไปยังหน้ารีวิว (เช่น /admin/review/1)
+    navigate(`/advisor/review/${id}`);
   };
 
   return (
-    <div className="flex role-super">
-      <SidebarSuper />
+    <div className="flex role-advisor">
+      <SidebarAdvi />
       <div className="main-container">
-        <h2 className="page-title">Verify Accounts</h2>
-        <p className="page-subtitle">
-          Accounts forwarded by Advisors. Start your review for each "In Process" item.
-        </p>
+        <h2 className="page-title">Verify Portfolios (Advisor Stage)</h2>
+        <p className="page-subtitle">Start reviewing, then forward to Super Admin.</p>
 
         <table className="verify-table">
           <thead>
             <tr>
-              <th>#</th>
-              <th>Name</th>
-              <th>Role</th>
-              <th>Status</th>
-              <th>Action</th>
+              <th>#</th><th>Title</th><th>Student</th><th>Status</th><th>Action</th>
             </tr>
           </thead>
           <tbody>
-            {accounts.map((acc, index) => (
-              <tr key={acc.id}>
-                <td>{index + 1}</td>
-                <td>{acc.name}</td>
-                <td>{acc.role}</td>
+            {portfolios.map((p, i) => (
+              <tr key={p.id}>
+                <td>{i + 1}</td>
+                <td>{p.title}</td>
+                <td>{p.student}</td>
                 <td>
-                  <span
-                    className={`status-badge ${
-                      acc.status === "In Process"
-                        ? "approved"   // ใช้สีเขียวเดิมแทน class ใหม่
-                        : acc.status === "Pending"
-                        ? "pending"
-                        : "rejected"
-                    }`}
-                  >
-                    {acc.status}
+                  <span className={`status-badge ${p.status.toLowerCase().replace(" ", "")}`}>
+                    {p.status}
                   </span>
                 </td>
                 <td>
                   <button
                     className="btn-approve"
-                    disabled={acc.status !== "In Process"}
-                    onClick={() => handleStartReview(acc.id)}
+                    disabled={p.status !== "Pending"}
+                    onClick={() => handleStartReview(p.id)}
                   >
                     Start Review
                   </button>
@@ -70,7 +58,6 @@ export default function VerifyAcc() {
             ))}
           </tbody>
         </table>
-
       </div>
     </div>
   );

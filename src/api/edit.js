@@ -1,5 +1,5 @@
 // src/api/edit.js
-const BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
+const BASE = process.env.REACT_APP_API_BASE;
 ;
 
 export async function editPortfolio(id, formData) {
