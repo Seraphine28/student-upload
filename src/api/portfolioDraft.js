@@ -1,5 +1,5 @@
 // src/api/portfolioDraft.js
-const BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
+const BASE = "";
 
 /**
  * Upload draft portfolio (save as draft)
@@ -8,7 +8,7 @@ const BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000";
  * @returns {Promise<object>} response JSON
  */
 export async function uploadPortfolioDraft(formData, token) {
-  const res = await fetch(`${BASE}/api/portfolio/v2`, {
+  const res = await fetch(`${BASE}/api/portfolio`, {
     method: "POST",
     headers: {
       ...(token ? { Authorization: `Bearer ${token}` } : {}),

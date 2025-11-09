@@ -10,7 +10,6 @@ export default function SidebarRecru() {
       </div>
 
       <ul className="menu">
-        <li>Home</li>
         <li>Log Out</li>
       </ul>
     </aside>

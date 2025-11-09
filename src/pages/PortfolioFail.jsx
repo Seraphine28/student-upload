@@ -1,94 +1,91 @@
+// src/pages/PortfolioFail.jsx
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getFallPortfolio } from "../api/fail";
+
+const API_BASE = "";
 
 export default function PortfolioFail() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [portfolio, setPortfolio] = useState(null);
-
-  const [form, setForm] = useState({
+  const [loading, setLoading]   = useState(true);
+  const [error, setError]       = useState("");
+  const [data, setData]         = useState({
     title: "",
     university: "",
     year: "",
     category: "",
     description: "",
-    files: [],
+    feedback: "",
+    files: [],            // ✅ กัน map error
   });
 
-  // โหลด mock portfolio (หรือจาก backend จริง)
-useEffect(() => {
-    async function fetchPortfolio() {
+  useEffect(() => {
+    let alive = true;
+
+    (async () => {
+      setLoading(true);
+      setError("");
       try {
-        // ✅ ลองโหลดจาก backend ก่อน
-        const token = localStorage.getItem("token"); // ถ้ามี token ก็แนบไป
-        const data = await getFallPortfolio(id, token);
-
-        setPortfolio(data);
-        setForm({
-          title: data.title || "",
-          university: data.university || "",
-          year: data.year || "",
-          category: data.category || "",
-          description: data.description || "",
-          files: data.files || [],
+        // ✅ ฝั่ง back มี GET /api/portfolio/detail/:id (ต้อง login)
+        // ถ้าระบบมี JWT ให้ใส่ header Authorization ตรงนี้ได้
+        const res = await fetch(`${API_BASE}/api/portfolio/detail/${id}`, {
+          // headers: { Authorization: `Bearer ${token}` },
         });
-      } catch (err) {
-        console.warn("⚠️ โหลดข้อมูลจริงไม่ได้ ใช้ mock แทน:", err.message);
 
-        // ✅ ใช้ mock ถ้า fetch ไม่สำเร็จ
-        const mock = {
-          title: "My Portfolio – Graphic Design",
-          university: "ABC University",
-          year: "2025",
-          category: "UI/UX",
-          description: "รวมผลงานออกแบบ UI ที่ทำในปี 2025",
-          files: [
-            { name: "design-portfolio.pdf", url: "#" },
-            { name: "ui-wireframe.png", url: "#" },
-            { name: "ux-flow.jpg", url: "#" },
-          ],
-          feedback: "ควรเพิ่มรายละเอียดในส่วน UX และโครงสร้างการออกแบบค่ะ",
-        };
+        if (!res.ok) {
+          const text = await res.text().catch(() => "");
+          throw new Error(`Fetch failed (${res.status}). ${text.slice(0,160)}`);
+        }
 
-        setPortfolio(mock);
-        setForm({
-          title: mock.title,
-          university: mock.university,
-          year: mock.year,
-          category: mock.category,
-          description: mock.description,
-          files: mock.files,
+        const p = await res.json(); // ตัวเดียว (ไม่ใช่ array)
+        if (!alive) return;
+
+        setData({
+          title:       p?.title ?? "",
+          university:  p?.university ?? p?.owner?.university ?? "",
+          year:        p?.year ?? p?.yearOfProject ?? "",
+          category:    p?.category ?? "",
+          description: p?.desc ?? p?.description ?? "",
+          feedback:    p?.feedback ?? "(no feedback provided)",
+          files:       Array.isArray(p?.files) ? p.files : [],   // ✅ ป้องกัน map error
         });
+      } catch (e) {
+        if (!alive) return;
+        setError(e.message || "Failed to load rejected portfolio");
+      } finally {
+        if (alive) setLoading(false);
       }
-    }
+    })();
 
-    fetchPortfolio();
+    return () => { alive = false; };
   }, [id]);
 
-
-  if (!portfolio) return <p style={{ textAlign: "center" }}>⏳ กำลังโหลด...</p>;
+  if (loading) return <p style={{ textAlign: "center" }}>⏳ Loading…</p>;
 
   return (
-    <div style={{
-      minHeight: "100vh",
-      padding: 20,
-      backgroundColor: "#fd9061ff",
-      fontFamily: "sans-serif",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center"
-    }}>
-      <div style={{
-        width: "100%",
-        maxWidth: 700,
-        backgroundColor: "#fd9061ff",
-        borderRadius: 12,
+    <div
+      style={{
+        minHeight: "100vh",
         padding: 20,
-        position: "relative"
-      }}>
-        {/* ไอคอนดินสอ */}
+        backgroundColor: "#fd9061",
+        fontFamily: "sans-serif",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <div
+        style={{
+          width: "100%",
+          maxWidth: 720,
+          backgroundColor: "#fd9061",
+          borderRadius: 12,
+          padding: 20,
+          position: "relative",
+        }}
+      >
+        {/* ปุ่มกลับไปแก้/ส่งใหม่ */}
         <button
           onClick={() => navigate(`/student/resubmit/${id}`)}
           style={{
@@ -97,137 +94,155 @@ useEffect(() => {
             right: 15,
             background: "transparent",
             border: "none",
-            fontSize: 35,
-            cursor: "pointer"
-    
+            fontSize: 32,
+            cursor: "pointer",
+            lineHeight: 1,
           }}
+          title="Resubmit"
+          aria-label="Resubmit"
         >
           ✒️
         </button>
 
-        <style>
-        {`
-          ::-webkit-scrollbar {
-            width: 8px;               /* ความกว้าง scroll */
-          }
-          ::-webkit-scrollbar-track {
-            background: #f0f0f0;      /* สีพื้น scroll track */
-            border-radius: 4px;
-          }
-          ::-webkit-scrollbar-thumb {
-            background-color: #85a2bfff; /* สี scroll thumb */
-            border-radius: 4px;
-          }
-        `}
-      </style>
-
-        <h2 style={{
-          textAlign: "center",
-          color: "#000000ff",
-          marginBottom: 10,
-          fontSize: 45
-        }}>
-          Fail 
-          Status Error
+        {/* title */}
+        <h2
+          style={{
+            textAlign: "center",
+            color: "#000",
+            marginBottom: 12,
+            fontSize: 42,
+            fontWeight: 800,
+          }}
+        >
+          Fail Status Error
         </h2>
 
-        {/* Feedback */}
-        <div style={{
-          width: "100%",
-          marginBottom: 10,
-          padding: 5,
-          background: "#fff",
-          borderRadius: 8,
-          border: "1px solid #ffffffff"
-        }}>
+        {/* error */}
+        {error && (
+          <div
+            style={{
+              background: "#fff",
+              border: "1px solid #f44336",
+              color: "#b71c1c",
+              padding: 10,
+              borderRadius: 8,
+              marginBottom: 12,
+              fontWeight: 600,
+            }}
+          >
+            {error}
+          </div>
+        )}
+
+        {/* feedback */}
+        <div
+          style={{
+            width: "100%",
+            marginBottom: 12,
+            padding: 10,
+            background: "#fff",
+            borderRadius: 8,
+            border: "1px solid #eee",
+          }}
+        >
           <strong>Feedback:</strong>
-          <p style={{ marginTop: 4 , marginBottom: 4}}>{portfolio.feedback}</p>
+          <p style={{ marginTop: 6 }}>{data.feedback}</p>
         </div>
 
-        {/* Title */}
-        <div style={{ marginBottom: 10 }}>
-          <label style={{ color: "#fff", marginBottom: 4, display: "block" }}>Title :</label>
-          <input
-            type="text"
-            value={portfolio.title}
-            readOnly
-            style={{ width: "100%", padding: 8, borderRadius: 6, border: "1px solid #ccc" }}
-          />
+        {/* fields */}
+        <Field label="Title" value={data.title} />
+        <Field label="University" value={data.university} />
+        <Field label="Year" value={data.year} />
+        <Field label="Category" value={data.category} />
+
+        {/* files */}
+        <div style={{ marginBottom: 12, color: "#fff" }}>
+          <label style={{ display: "block", marginBottom: 6 }}>
+            Attached Files:
+          </label>
+          {data.files.length === 0 ? (
+            <div style={{ color: "#222", background: "#fff", padding: 8, borderRadius: 6, border: "1px solid #ccc" }}>
+              (no attached files)
+            </div>
+          ) : (
+            <ul style={{ paddingLeft: 20 }}>
+              {data.files.map((f, idx) => {
+                // รองรับทั้ง array เป็น string path หรือ object {name,url}
+                const name = typeof f === "string" ? f.split("/").slice(-1)[0] : f?.name || `file_${idx+1}`;
+                const url  = typeof f === "string" ? f : f?.url || "#";
+                return (
+                  <li key={idx}>
+                    <a href={url} target="_blank" rel="noreferrer">
+                      {name}
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </div>
 
-        {/* University */}
-        <div style={{ marginBottom: 10 }}>
-          <label style={{ color: "#fff", marginBottom: 4, display: "block" }}>University :</label>
-          <input
-            type="text"
-            value={portfolio.university}
-            readOnly
-            style={{ width: "100%", padding: 8, borderRadius: 6, border: "1px solid #ccc" }}
-          />
-        </div>
-
-        {/* Year */}
-        <div style={{ marginBottom: 10 }}>
-          <label style={{ color: "#fff", marginBottom: 4, display: "block" }}>Year :</label>
-          <input
-            type="text"
-            value={portfolio.year}
-            readOnly
-            style={{ width: "100%", padding: 8, borderRadius: 6, border: "1px solid #ccc" }}
-          />
-        </div>
-
-        {/* Category */}
-        <div style={{ marginBottom: 10 }}>
-          <label style={{ color: "#fff", marginBottom: 4, display: "block" }}>Category :</label>
-          <input
-            type="text"
-            value={portfolio.category}
-            readOnly
-            style={{ width: "100%", padding: 8, borderRadius: 6, border: "1px solid #ccc" }}
-          />
-        </div>
-        {/* Attached Files */}
-        <div style={{ marginBottom: 15,color: "white" }}>
-          <label>Attached Files:</label>
-          <ul style={{ paddingLeft: 20 }}>
-            {portfolio.files.map((file, idx) => (
-              <li key={idx}>
-                <a href={file.url} target="_blank" rel="noreferrer">{file.name}</a>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Description */}
-        <div style={{ marginBottom: 10 }}>
-          <label style={{ color: "#fff", marginBottom: 4, display: "block" }}>Description :</label>
+        {/* description */}
+        <div style={{ marginBottom: 12 }}>
+          <label style={{ color: "#fff", marginBottom: 6, display: "block" }}>
+            Description:
+          </label>
           <textarea
-            value={portfolio.description}
+            value={data.description}
             readOnly
-            style={{ width: "100%", padding: 8, borderRadius: 6, border: "1px solid #ccc", resize: "none" }}
+            style={{
+              width: "100%",
+              padding: 10,
+              borderRadius: 8,
+              border: "1px solid #ccc",
+              resize: "none",
+              background: "#fff",
+              minHeight: 100,
+            }}
           />
         </div>
 
-        {/* OK Button */}
+        {/* OK */}
         <button
-          onClick={() => navigate(`/student/status`)}
+          onClick={() => navigate("/student/status")}
           style={{
             display: "block",
-            marginLeft: "auto",
-            marginRight: "auto",
-            backgroundColor: "#419463ff",
+            margin: "0 auto",
+            backgroundColor: "#419463",
             border: "none",
-            color: "white",
-            padding: "10px 25px",
+            color: "#fff",
+            padding: "10px 24px",
             borderRadius: 6,
             cursor: "pointer",
-            fontWeight: "bold"
+            fontWeight: 700,
           }}
         >
           OK
         </button>
       </div>
+    </div>
+  );
+}
+
+/** input readOnly สวย ๆ */
+function Field({ label, value }) {
+  return (
+    <div style={{ marginBottom: 12 }}>
+      <label style={{ color: "#fff", marginBottom: 6, display: "block" }}>
+        {label} :
+      </label>
+      <input
+        type="text"
+        value={value}
+        readOnly
+        style={{
+          width: "100%",
+          padding: 10,
+          borderRadius: 8,
+          border: "1px solid #ccc",
+          background: "#fff",
+        }}
+      />
     </div>
   );
 }

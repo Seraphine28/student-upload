@@ -1,22 +1,20 @@
 import React, { useState, useRef, useEffect } from "react";
 import FileInput from "../components/FileInput";
 import { validateFiles } from "../utils/validators";
-import { editPortfolio } from "../api/edit";
 import { useNavigate, useParams } from "react-router-dom";
-import { getPortfolio } from "../api/portfolio";
-import { uploadPortfolioDraft } from "../api/portfolioDraft"; //เพิ่ม
-
-
+import { getPortfolio } from "../api/portfolio";  // ฟังก์ชันที่ใช้ดึงข้อมูล portfolio
+import { uploadPortfolioDraft } from "../api/portfolioDraft";  // สำหรับการบันทึกข้อมูลชั่วคราว
+import { editPortfolio } from "../api/edit";  // ใช้สำหรับการอัพเดต portfolio
 
 export default function EditPage() {
-  const { id } = useParams();
+  const { id } = useParams(); // ดึง id จาก URL
   const [form, setForm] = useState({
     title: "",
-    university: [],
-    year: [],
-    category: [],
+    university: "",
+    year: "",
+    category: "",
     description: "",
-    files: []
+    files: [],
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -35,29 +33,44 @@ export default function EditPage() {
       "AI", "ML", "BI", "QA", "UX/UI", "Database", "Software Engineering",
       "IOT", "Gaming", "Web Development", "Coding", "Data Science",
       "Hackathon", "Bigdata", "Data Analytics"
-    ]
+    ],
   };
 
-  const handleFileChange = (files) => setForm(f => ({ ...f, files }));
+  // ฟังก์ชันที่ใช้จัดการไฟล์
+  const handleFileChange = (files) => setForm((f) => ({ ...f, files }));
 
+  // ฟังก์ชันที่ใช้ส่งข้อมูลเมื่อกด submit
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const v = validateFiles(form.files);
-    if (!v.ok) return setError(v.msg);
-    setError(""); setLoading(true);
+    if (!v.ok) {
+      setError(v.msg);
+      return;
+    }
 
-    const fd = new FormData();
-                  fd.append("title", form.title);
-                  fd.append("description", form.description);
-                  fd.append("university", form.university);
-                  fd.append("yearOfProject", form.year);
-                  fd.append("category", form.category);
-                  form.files.forEach(file => fd.append("images", file));
-
+    setError(""); 
+    setLoading(true);
 
     try {
-      await editPortfolio(form.id, fd);
-      navigate("/student/home"); // กลับหน้า Dashboard
+      const fd = new FormData();
+      fd.append("title", form.title);
+      fd.append("university", form.university);
+      fd.append("year", form.year);
+      fd.append("category", form.category);
+      fd.append("desc", form.description);
+      form.files.forEach((f) => fd.append("portfolioFiles", f));
+
+      // ใช้ PUT เพื่อแก้ไข portfolio โดยใช้ id ที่ได้จาก useParams()
+      const res = await fetch(`/api/portfolio/${id}/edit`, {
+        method: "PUT",
+        body: fd,
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Update failed");
+
+      navigate("/student/status");  // ไปยังหน้า status หลังจากอัพเดตสำเร็จ
     } catch (err) {
       setError(err.message || "Update failed");
     } finally {
@@ -76,8 +89,8 @@ export default function EditPage() {
   }, []);
 
   const renderMultiFilter = (label, values, setValues, showPopup, setShowPopup, options, ref) => (
-    <div style={{ display: "flex", flexDirection: "column", width: "100%", marginBottom: 5,fontSize: 12, position: "relative" }} ref={ref}>
-      <label style={{ color: "white", marginBottom: 4 ,fontSize: 20}}>{label}</label>
+    <div style={{ display: "flex", flexDirection: "column", width: "100%", marginBottom: 5, fontSize: 12, position: "relative" }} ref={ref}>
+      <label style={{ color: "white", marginBottom: 4, fontSize: 20 }}>{label}</label>
       <div style={{ position: "relative", width: "100%" }}>
         <div
           onClick={() => setShowPopup(!showPopup)}
@@ -93,38 +106,45 @@ export default function EditPage() {
           }}
         >
           {values.length > 0 ? values.join(", ") : "Select..."}
-          <span style={{
-            position: "absolute",
-            right: 10,
-            top: "50%",
-            transform: showPopup ? "translateY(-50%) rotate(180deg)" : "translateY(-50%) rotate(0deg)",
-            fontSize: 12,
-            transition: "transform 0.2s",
-            userSelect: "none"
-          }}>▼</span>
+          <span
+            style={{
+              position: "absolute",
+              right: 10,
+              top: "50%",
+              transform: showPopup ? "translateY(-50%) rotate(180deg)" : "translateY(-50%) rotate(0deg)",
+              fontSize: 12,
+              transition: "transform 0.2s",
+              userSelect: "none",
+            }}
+          >
+            ▼
+          </span>
         </div>
 
         {showPopup && options && (
-          <div style={{
-            position: "absolute",
-            top: "100%",
-            left: 0,
-            width: "100%",
-            background: "#fff",
-            border: "1px solid #ccc",
-            borderRadius: 8,
-            zIndex: 10,
-            marginTop: 2,
-            maxHeight: 150,
-            overflowY: "auto"
-          }}>
-            {options.map(opt => {
+          <div
+            style={{
+              position: "absolute",
+              top: "100%",
+              left: 0,
+              width: "100%",
+              background: "#fff",
+              border: "1px solid #ccc",
+              borderRadius: 8,
+              zIndex: 10,
+              marginTop: 2,
+              maxHeight: 150,
+              overflowY: "auto",
+            }}
+          >
+            {options.map((opt) => {
               const isSelected = values.includes(opt);
               return (
-                <div key={opt}
+                <div
+                  key={opt}
                   onClick={() => {
                     if (isSelected) {
-                      setValues(values.filter(v => v !== opt));
+                      setValues(values.filter((v) => v !== opt));
                     } else {
                       setValues([...values, opt]);
                     }
@@ -133,7 +153,7 @@ export default function EditPage() {
                     padding: "5px 10px",
                     cursor: "pointer",
                     background: isSelected ? "#d8e9ff" : "white",
-                    fontWeight: isSelected ? "bold" : "normal"
+                    fontWeight: isSelected ? "bold" : "normal",
                   }}
                 >
                   {opt}
@@ -147,22 +167,23 @@ export default function EditPage() {
   );
 
   return (
-    <div style={{
-      height: "100vh",
-      width: "100%",
-      backgroundColor: "#fd9061ff",
-      display: "flex",
-      justifyContent: "center",
-      flexDirection: "column",
-      boxSizing: "border-box",
-      overflow: "hidden",
-      position: "relative",
-      padding: 20,
-      fontSize: 20,
-      fontFamily: "sans-serif"
-    }}>
-      
-      {/* กากบาทมุมบนขวา */}
+    <div
+      style={{
+        height: "100vh",
+        width: "100%",
+        backgroundColor: "#fd9061ff",
+        display: "flex",
+        justifyContent: "center",
+        flexDirection: "column",
+        boxSizing: "border-box",
+        overflow: "hidden",
+        position: "relative",
+        padding: 20,
+        fontSize: 20,
+        fontFamily: "sans-serif",
+      }}
+    >
+      {/* ปุ่มกากบาทมุมบนขวา */}
       <button
         onClick={() => navigate("/student/status")}
         style={{
@@ -174,84 +195,88 @@ export default function EditPage() {
           fontSize: 50,
           fontWeight: "bold",
           cursor: "pointer",
-          color: "#ffffffff"
+          color: "#ffffffff",
         }}
-      >×</button>
+      >
+        ×
+      </button>
 
-      <div style={{
-        width: "100%",
-        maxWidth: 1000,
-        height: "100%",
-        backgroundColor: "#fd9061ff",
-        borderRadius: 12,
-        padding: 20,
-        boxSizing: "border-box",
-        margin: "0 auto",
-        display: "flex",
-        flexDirection: "column",
-        overflowY: "auto",
-      }}
-    >
-      <style>
-        {`
+      <div
+        style={{
+          width: "100%",
+          maxWidth: 1000,
+          height: "100%",
+          backgroundColor: "#fd9061ff",
+          borderRadius: 12,
+          padding: 20,
+          boxSizing: "border-box",
+          margin: "0 auto",
+          display: "flex",
+          flexDirection: "column",
+          overflowY: "auto",
+        }}
+      >
+        <style>
+          {`
           ::-webkit-scrollbar {
-            width: 8px;               /* ความกว้าง scroll */
+            width: 8px;
           }
           ::-webkit-scrollbar-track {
-            background: #f0f0f0;      /* สีพื้น scroll track */
+            background: #f0f0f0;
             border-radius: 4px;
           }
           ::-webkit-scrollbar-thumb {
-            background-color: #85a2bfff; /* สี scroll thumb */
+            background-color: #85a2bfff;
             border-radius: 4px;
           }
         `}
-      </style>
+        </style>
 
-        <h2 style={{
-          textAlign: "center",
-          color: "#000000ff",
-          marginBottom: 10,
-          fontSize: 55,
-          fontWeight: "bold",
-          fontFamily: "Poppins"
-        }}>
+        <h2
+          style={{
+            textAlign: "center",
+            color: "#000000ff",
+            marginBottom: 10,
+            fontSize: 55,
+            fontWeight: "bold",
+            fontFamily: "Poppins",
+          }}
+        >
           Edit Portfolio
         </h2>
 
         {error && <div style={{ color: "red", marginBottom: 15 }}>{error}</div>}
 
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column" }}>
-                    {/* Title */}
+          {/* Title */}
           <div style={{ marginBottom: 5 }}>
             <label style={{ color: "white", display: "block", marginBottom: 4 }}>Title :</label>
             <input
               value={form.title}
-              onChange={e => setForm({ ...form, title: e.target.value })}
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
               style={{ width: "100%", padding: 10, borderRadius: 8, border: "1px solid #ccc", boxSizing: "border-box" }}
             />
           </div>
 
           {/* Multi-Select Filters */}
-          <div style={{ marginBottom: 10,color: "white" }}>
-          <label>University:</label>
-          <input
-            type="text"
-            value="Kmutt"
-            readOnly
-            style={{ width: "100%", padding: 8, borderRadius: 8, border: "1px solid #ccc", boxSizing: "border-box" }}
-          />
-        </div>
-          {renderMultiFilter("Year of project/work/prize :", form.year, v => setForm({ ...form, year: v }),
-            showYearPopup, setShowYearPopup, filters.yearOptions, yearRef)}
+          <div style={{ marginBottom: 10, color: "white" }}>
+            <label>University:</label>
+            <input
+              type="text"
+              value="Kmutt"
+              readOnly
+              style={{ width: "100%", padding: 8, borderRadius: 8, border: "1px solid #ccc", boxSizing: "border-box" }}
+            />
+          </div>
+          {renderMultiFilter("Year of project/work/prize :", form.year, (v) => setForm({ ...form, year: v }), showYearPopup, setShowYearPopup, filters.yearOptions, yearRef)}
 
-          {renderMultiFilter("Category :", form.category, v => setForm({ ...form, category: v }),
-            showCategoryPopup, setShowCategoryPopup, filters.categoryOptions, catRef)}
+          {renderMultiFilter("Category :", form.category, (v) => setForm({ ...form, category: v }), showCategoryPopup, setShowCategoryPopup, filters.categoryOptions, catRef)}
 
-
-                    {/* FileInput */}
+          {/* FileInput */}
           <div style={{ marginBottom: 5 }}>
-            <label style={{ color: "white", display: "block", marginBottom: 4}}>Attach Files (at least one picture max ten picture) :</label>
+            <label style={{ color: "white", display: "block", marginBottom: 4 }}>
+              Attach Files (at least one picture max ten picture) :
+            </label>
             <FileInput files={form.files} onChange={handleFileChange} />
           </div>
 
@@ -260,7 +285,7 @@ export default function EditPage() {
             <label style={{ color: "white", display: "block", marginBottom: 4 }}>Description :</label>
             <textarea
               value={form.description}
-              onChange={e => setForm({ ...form, description: e.target.value })}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
               style={{ width: "100%", padding: 10, borderRadius: 8, border: "1px solid #ccc", boxSizing: "border-box" }}
             />
           </div>
@@ -281,7 +306,7 @@ export default function EditPage() {
                   fd.append("university", form.university);
                   fd.append("yearOfProject", form.year);
                   fd.append("category", form.category);
-                  form.files.forEach(file => fd.append("images", file));
+                  form.files.forEach((file) => fd.append("images", file));
 
                   const result = await uploadPortfolioDraft(fd);
                   console.log("Draft saved:", result);
@@ -291,20 +316,20 @@ export default function EditPage() {
                 } finally {
                   setLoading(false);
                 }
-                }}
-                style={{
-                  flex: 1,
-                  padding: 10,
-                  borderRadius: 8,
-                  fontSize: 15,
-                  border: "1px solid #c0bdbdff",
-                  background: "#c2bcbcff",
-                  color: "#000"
-                }}
-              >
-                {loading ? "Saving..." : "Draft"}
-              </button> 
-            
+              }}
+              style={{
+                flex: 1,
+                padding: 10,
+                borderRadius: 8,
+                fontSize: 15,
+                border: "1px solid #c0bdbdff",
+                background: "#c2bcbcff",
+                color: "#000",
+              }}
+            >
+              {loading ? "Saving..." : "Draft"}
+            </button>
+
             <button
               type="submit"
               disabled={loading}
@@ -315,7 +340,7 @@ export default function EditPage() {
                 fontSize: 15,
                 border: "1px solid #5b8db8",
                 background: "#5b8db8",
-                color: "#fff"
+                color: "#fff",
               }}
             >
               {loading ? "Uploading..." : "Upload"}

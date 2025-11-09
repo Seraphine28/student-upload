@@ -1,9 +1,9 @@
 // src/api/upload.js
-const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000"; // backup ถ้า env หาย
+const BASE = "";
 
 export async function uploadPortfolio(formData, token) {
   try {
-    const res = await fetch(`${API_BASE}/api/portfolio`, {
+    const res = await fetch(`${BASE}/api/portfolio`, {
       method: "POST",
       headers: token
         ? {

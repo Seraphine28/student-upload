@@ -1,49 +1,36 @@
-// src/components/NormalCard.jsx
 import React from "react";
 import { Link } from "react-router-dom";
 import "./NormalCard.css";
 
 export default function NormalCard({
-  id,
-  title,
-  name,
-  university,
-  year,
-  description,
-  image,
-  category,
-  status = "",
-  editMode = false,
-  isPublic = false,
-  onVisibilityChange,
+  id, title, name, university, year, description, image, category,
+  status = "", editMode = false, isPublic = false, onVisibilityChange,
 }) {
-  const statusClass = status.toLowerCase().replace(/\s+/g, "");
-  const isApproved = status === "Approved";
+  const statusLower = String(status || "").toLowerCase(); // draft/pending/in_process/approved/rejected
+  const statusClass = statusLower.replace(/\s+/g, "");
+  const isApproved = statusLower === "approved";
 
   const linkPath =
-    status === "Draft"  ? `/student/edit/${id}` :
-    status === "Failed" ? `/student/resubmit/${id}` :
+    statusLower === "draft"   ? `/student/edit/${id}` :
+    statusLower === "failed" || statusLower === "rejected" ? `/student/resubmit/${id}` :
     null;
 
-  const commentPath = `/project/${id}/comments`;
+  const commentPath = `/project/${id}`; // ลิงก์ไปหน้าอ่าน public (จะกันในหน้าอ่านอีกชั้น)
 
-  // เนื้อหาการ์ดหลัก
   const body = (
     <div className="card normal-card">
-      {/* แถวบน: ชื่อ + badge */}
       <div className="card-top">
         <h3 className="card-title">{title}</h3>
         {status && <span className={`status-badge ${statusClass}`}>{status}</span>}
       </div>
 
-      {/* รูปภาพ */}
       <img
         src={image || "https://via.placeholder.com/600x320?text=Project"}
         alt={title}
         className="card-img"
+        loading="lazy"
       />
 
-      {/* เนื้อหา */}
       <div className="card-content">
         <p><strong>Name:</strong> {name || "-"}</p>
         <p><strong>University:</strong> {university || "-"}</p>
@@ -51,7 +38,6 @@ export default function NormalCard({
         <p><strong>Category:</strong> {category || "-"}</p>
         <p className="desc"><strong>Description:</strong> {description || "-"}</p>
 
-        {/* แสดงสวิตช์เฉพาะ Approved */}
         {isApproved && typeof onVisibilityChange === "function" && (
           <div className="visibility-control">
             <label className="switch-label">
@@ -67,7 +53,6 @@ export default function NormalCard({
           </div>
         )}
 
-        {/* ปุ่มแก้/ลบ เฉพาะตอน editMode */}
         {editMode && (
           <div className="edit-buttons">
             {linkPath ? (
@@ -82,13 +67,7 @@ export default function NormalCard({
     </div>
   );
 
-  // ถ้า Approved ให้ทั้งการ์ดคลิกได้
   return isApproved ? (
-    <Link to={commentPath} className="card-link-wrapper">
-      {body}
-    </Link>
-  ) : (
-    body
-  );
+    <Link to={commentPath} className="card-link-wrapper">{body}</Link>
+  ) : ( body );
 }
-

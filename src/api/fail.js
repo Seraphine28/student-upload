@@ -1,17 +1,20 @@
-const BASE = process.env.REACT_APP_API_BASE;
-export async function getFallPortfolio(id, token) {
-  const res = await fetch(`${BASE}/api/portfolio/${id}/fail`, {
-    method: "GET",
-    headers: {
-      ...(token ? { "Authorization": `Bearer ${token}` } : {}),
-    },
-  });
+// src/api/fail.js
+const BASE = "";
 
-  const data = await res.json();
+function authHeader(token) {
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
 
-  if (!res.ok) {
-    throw new Error(data.message || "Failed to fetch fall portfolio");
+export async function getFailPortfolio(id, token) {
+  try {
+    const res = await fetch(`${BASE}/api/portfolio/detail/${id}`, {
+      headers: { ...authHeader(token) },
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Get fail portfolio failed");
+    return data; // ✅ backend คืนข้อมูลครบ (title, files, feedback)
+  } catch (err) {
+    console.error("getFailPortfolio error:", err);
+    throw err;
   }
-
-  return data; // { id, title, description, files, feedback, ... }
 }
